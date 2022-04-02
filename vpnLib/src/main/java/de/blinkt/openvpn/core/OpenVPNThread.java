@@ -6,7 +6,14 @@
 package de.blinkt.openvpn.core;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.VpnService;
+import android.os.Build;
 import android.util.Log;
+
+import androidx.core.content.ContextCompat;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -23,6 +30,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.blinkt.openvpn.R;
+import me.letal1s.utils.KillswitchService;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class OpenVPNThread implements Runnable {
     private static final String DUMP_PATH_STRING = "Dump path: ";
@@ -40,7 +50,7 @@ public class OpenVPNThread implements Runnable {
     private static Process mProcess;
     private String mNativeDir;
     private String mTmpDir;
-    private static OpenVPNService mService;
+    public static OpenVPNService mService;
     private String mDumpPath;
     private boolean mBrokenPie = false;
     private boolean mNoProcessExitStatus = false;
@@ -70,6 +80,21 @@ public class OpenVPNThread implements Runnable {
             Log.i(TAG, "Starting openvpn");
             startOpenVPNThreadArgs(mArgv);
             Log.i(TAG, "OpenVPN process exited");
+
+            //Check if 'killswitch' pref is true. If so start killswitch and display notification.
+            SharedPreferences flutterPrefs = mService.getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE);
+            boolean killswitch = flutterPrefs.getBoolean("flutter.killswitch", false);
+            if (killswitch) {
+                Intent setupKillswitch = VpnService.prepare(mService);
+                if (setupKillswitch != null) {
+                    mService.startActivity(setupKillswitch);
+                }
+                Intent startKillswitch = new Intent(mService, KillswitchService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    ContextCompat.startForegroundService(mService, startKillswitch);
+                else
+                    mService.startService(startKillswitch);
+            }
         } catch (Exception e) {
             VpnStatus.logException("Starting OpenVPN Thread", e);
             Log.e(TAG, "OpenVPNThread Got " + e.toString());

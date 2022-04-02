@@ -61,11 +61,11 @@ public class ProfileManager {
     }
 
     public static void setConntectedVpnProfileDisconnected(Context c) {
-        SharedPreferences prefs = Preferences.getDefaultSharedPreferences(c);
-        Editor prefsedit = prefs.edit();
-        prefsedit.putString(LAST_CONNECTED_PROFILE, null);
-        prefsedit.apply();
-
+//        SharedPreferences prefs = Preferences.getDefaultSharedPreferences(c);
+//        Editor prefsedit = prefs.edit();
+//        prefsedit.putString(LAST_CONNECTED_PROFILE, null);
+//        prefsedit.apply();
+        return;
     }
 
     /**

@@ -8,9 +8,13 @@ package de.blinkt.openvpn.core;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.util.Log;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -20,6 +24,8 @@ import java.util.Locale;
 import java.util.Vector;
 
 import de.blinkt.openvpn.R;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class VpnStatus {
 
@@ -277,6 +283,8 @@ public class VpnStatus {
     }
 
     private static int getLocalizedState(String state) {
+        //'killswitch' pref is only for app killswitch not native one.
+
         switch (state) {
             case "CONNECTING":
                 return R.string.state_connecting;
@@ -291,6 +299,14 @@ public class VpnStatus {
             case "ADD_ROUTES":
                 return R.string.state_add_routes;
             case "CONNECTED":
+                //Check if 'killswitch' pref is true. If so disable killswitch as is now connected.
+                SharedPreferences flutterPrefs = OpenVPNThread.mService.getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE);
+                boolean killswitch = flutterPrefs.getBoolean("flutter.killswitch", false); //returns false if doesn't exist due to 2nd parameter
+                if (killswitch) {
+                    Intent stopKillswitch = new Intent("stop_killswitch");
+                    LocalBroadcastManager.getInstance(OpenVPNThread.mService).sendBroadcast(stopKillswitch);
+                }
+
                 return R.string.state_connected;
             case "DISCONNECTED":
                 return R.string.state_disconnected;

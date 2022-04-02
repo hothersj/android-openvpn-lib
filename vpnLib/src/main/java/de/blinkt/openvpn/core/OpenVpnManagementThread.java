@@ -17,6 +17,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import android.system.Os;
 import android.util.Log;
+import android.widget.Toast;
+
 import de.blinkt.openvpn.R;
 import de.blinkt.openvpn.VpnProfile;
 
