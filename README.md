@@ -1,34 +1,35 @@
-# Cake-VPN
-Android VPN app based on OpenVPN library.
+# Android VPN Library — Extended Edition
 
-</br>
-<img height='450' width ='250' src="https://i.imgur.com/5GV1Y2L.gif" />
-</br></br>
+This repository contains an Android OpenVPN client library with significant modifications that I made several years ago to reach feature‑parity with commercial VPN apps.  It builds on the OpenVPN/ICS‑OpenVPN stack and introduces a kill‑switch, improved notification handling, and other usability refinements.
 
-## Note
+## ✨ Key Enhancements
 
-I use free OpenVPN configuration file from this site https://www.vpngate.net/en/ </br>
-I am not sure how long it will work with the free ovpn file. It's better to update ovpn files with your own ovpn.
-</br></br>
+### Kill‑Switch Support
+A new `KillswitchService` and related hooks were added to enforce a “no‑leak” policy.  When the user enables the kill‑switch preference, the library starts a small dummy VPN (the kill‑switch) whenever the main VPN process ends unexpectedly.  This dummy VPN blocks network traffic until the real VPN reconnects, preventing accidental traffic leaks.
 
-## Instruction to update server list:
-1. Replace/add your .ovpn file with <b> assets/</b> directory .ovpn file
-2. Now go to MainActivity.class and find the "getServerList()" method there you have to update server information.
-3. [!Optional] At Last go to SharedPreference.class and find the "getServer()" method there update default server information.
-</br> </br>
-<img height='450' width ='300' src="https://i.imgur.com/kcGZY4P.png" /> 
-</br>
-<img height='400' width ='500' src="https://i.imgur.com/mlb8Nqe.png" />
-</br>
-<img height='400' width ='500' src="https://i.imgur.com/GgvoPP9.png" />
+### Dynamic Notification & Control Changes
+Notifications were overhauled to give clearer status information and better Android‑O integration.  The code now uses `NotificationChannel` with a descriptive name (“VPN Status”) and proper importance levels.  Pause/resume actions were removed in favour of a simpler “disconnect” control, and the disconnect intent now launches the app instead of a separate `DisconnectVPNActivity`.
 
+### Removal of Timeouts and Static Profile IDs
+The upstream project supported per‑profile timeouts and profile IDs; these were stripped away to streamline the API.  Methods like `OpenVpnApi.startVpn` no longer accept timeout or profile‑ID arguments, and the associated fields were removed from `VpnProfile`.  Connection state is managed via shared preferences rather than a timeout thread.
 
+### Updated Broadcast & Status Handling
+The fork relies on `LocalBroadcastManager` to broadcast connection state changes directly.  It removes legacy calls that wrote status into “flutter_openvpn” preferences and instead sends real broadcasts so the app can react promptly.
 
-## License
-**Free Software!**
+### Branding & String Updates
+Strings were updated from the upstream names (“VPNex”) to a new project name (“CentriVPN”) in notifications and session strings to reflect the customised app branding.
 
-This project and the uses VPN library "ICS OpenVPN" both are under GPLv2 License.
+### General Code Clean‑ups
+- Hard‑coded server/profile handling was removed in favour of cleaner state management.
+- Several deprecated methods and unused fields were deleted.
+- Minor bug fixes and spelling corrections (e.g., “Copyroight” → “Copyright”).
 
-> Make sure you understand the licenses of the code. OpenVPN for Android is GPL licensed.
+## 🛠 Project Goals
 
-- see the [License File](LICENSE) for more details.
+This fork began as a learning project but quickly evolved into a feature‑complete Android VPN client.  My goal was to replicate the kill‑switch and notification behaviours found in commercial VPN apps while keeping everything open source.  The changes here demonstrate how to extend the open‑source OpenVPN client to enforce traffic‑leak prevention, improve user notifications, and simplify profile handling.
+
+## 📜 Licensing
+
+The original OpenVPN code is under GPL v2 with additional terms; my modifications remain under the same license.  Please review the upstream license for details.
+
+---
